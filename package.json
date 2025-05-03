@@ -1,0 +1,17 @@
+{
+  "name": "pb-score",
+  "version": "0.0.1",
+  "main": "sync.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Santhosh veer",
+  "license": "MIT",
+  "packageManager": "pnpm@10.9.0",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "dotenv": "^16.5.0",
+    "pocketbase": "^0.26.0"
+  }
+}
