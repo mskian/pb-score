@@ -7,13 +7,25 @@ const {
   POCKETBASE_EMAIL,
   POCKETBASE_PASSWORD,
   RECORD_ID,
-  SCORE_DB
+  SCORE_DB,
+  MATCH_ID,
+  PB_COLLECTION
 } = process.env;
 
 if (!POCKETBASE_URL || !POCKETBASE_EMAIL || !POCKETBASE_PASSWORD || !SCORE_DB) {
   console.error('❌ Missing required environment variables. Check your .env file.');
   process.exit(1);
 }
+
+const fetchMatchID = async () => {
+  try {
+    const res = await axios.get(MATCH_ID, { timeout: 3000 });
+    if (!res.data?.data_id) throw new Error('Missing `data_id` in match ID source.');
+    return res.data.data_id;
+  } catch (error) {
+    throw new Error(`Failed to fetch match ID: ${error.message}`);
+  }
+};
 
 const fetchLiveScore = async (url) => {
   try {
@@ -26,8 +38,8 @@ const fetchLiveScore = async (url) => {
     });
 
     const data = response.data;
-
     const requiredFields = ['title', 'update'];
+
     for (const field of requiredFields) {
       if (!data[field] || typeof data[field] !== 'string') {
         throw new Error(`Missing or invalid field: ${field}`);
@@ -50,7 +62,7 @@ const syncToPocketBase = async (record) => {
 
   try {
     await pb.collection('_superusers').authWithPassword(POCKETBASE_EMAIL, POCKETBASE_PASSWORD);
-    const collection = pb.collection('live_scores');
+    const collection = pb.collection(PB_COLLECTION);
 
     const result = RECORD_ID
       ? await collection.update(RECORD_ID, record)
@@ -64,13 +76,26 @@ const syncToPocketBase = async (record) => {
 
 const main = async () => {
   try {
-    console.log('🔄 Syncing live score data...');
-    const scoreData = await fetchLiveScore(SCORE_DB);
+
+    console.log('🔄 Fetching match ID...');
+    const matchID = await fetchMatchID();
+
+    console.log(`📌 Match ID: ${matchID}`);
+    const fullScoreUrl = `${SCORE_DB}${matchID}`;
+
+    console.log('📡 Fetching live score...');
+    const scoreData = await fetchLiveScore(fullScoreUrl);
+
+    console.log('💾 Syncing to PocketBase...');
     await syncToPocketBase(scoreData);
+
     console.log('✅ Sync complete.');
+
   } catch (err) {
+
     console.error(`❌ ${err.message}`);
     process.exit(1);
+
   }
 };
 
