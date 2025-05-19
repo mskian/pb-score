@@ -50,7 +50,15 @@ const fetchLiveScore = async (url) => {
       title: data.title.replace(' - Live Cricket Score', '').trim(),
       update: data.update.trim(),
       livescore: (data.livescore || '').trim(),
-      runrate: (data.runrate || '').trim()
+      runrate: (data.runrate || '').trim(),
+      batterone: (data.batterone || '').trim(),
+      batsmanonerun: (data.batsmanonerun || '').trim(),
+      batsmanoneball: (data.batsmanoneball || '').trim(),
+      batsmanonesr: (data.batsmanonesr || '').trim(),
+      bowlerone: (data.bowlerone || '').trim(),
+      bowleroneover: (data.bowleroneover || '').trim(),
+      bowleronerun: (data.bowleronerun || '').trim(),
+      bowleronewickers: (data.bowleronewickers || '').trim()
     };
   } catch (error) {
     throw new Error(`Fetch error: ${error.message}`);
